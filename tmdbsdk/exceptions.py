@@ -1,0 +1,2 @@
+class TmdbApiException(Exception):
+    pass
