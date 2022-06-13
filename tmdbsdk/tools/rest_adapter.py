@@ -28,7 +28,7 @@ class RestAdapter:
         try:
             post_request = requests.post(self.auth_url, json=self._api_key)
         except requests.exceptions.RequestException as e:
-            logging.critical(str(e))
+            logging.critical(str(e), exc_info=True)
             raise TmdbApiException('Request failed') from e
 
         try:
@@ -39,7 +39,7 @@ class RestAdapter:
                              'Authorization': f'Bearer {self._token}'}
             self._session.headers.update(self._headers)
         except KeyError:
-            logging.critical(post_request.json()['details'])
+            logging.critical(post_request.json()['details'], exc_info=True)
             raise TmdbApiException(post_request.json()['details'])
 
     def _check_and_reauth(self) -> datetime.datetime:
@@ -65,7 +65,7 @@ class RestAdapter:
             logging.debug(log_line_pre)
             return self._session.request(method=method, url=url, params=params, json=json)
         except requests.exceptions.RequestException as e:
-            logging.critical(str(e))
+            logging.critical(str(e), exc_info=True)
             raise TmdbApiException('Request failed') from e
 
     def _do(self, http_method: str, endpoint: str, ep_params: dict = {}, data: dict = {}) -> Result:
@@ -90,7 +90,8 @@ class RestAdapter:
         try:
             data_out = response.json()
         except (ValueError, JSONDecodeError) as e:
-            logging.critical(log_line_post.format(False, None, e))
+            logging.critical(log_line_post.format(
+                False, None, e), exc_info=True)
             raise TmdbApiException('Bad JSON in response') from e
 
         # If status_code in 200-299 range, return success Result with data, otherwise raise exception
